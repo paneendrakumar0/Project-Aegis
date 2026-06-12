@@ -12,6 +12,7 @@ Generate JSONL telemetry:
 
 ```bash
 python3 -m aegis.cli --runs 1 --seed 42 --trace-jsonl reports/trace-42.jsonl
+python3 -m aegis.cli --runs 1 --seed 42 --scenario-config scenarios/baseline_asset_defense.json --trace-jsonl reports/baseline-scenario-trace.jsonl
 ```
 
 Each line contains:

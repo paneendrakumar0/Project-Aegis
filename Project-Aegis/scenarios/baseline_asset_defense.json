@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "name": "baseline_asset_defense",
+  "bounds_m": [1000.0, 700.0],
+  "dt_s": 0.5,
+  "max_time_s": 120.0,
+  "intercept_radius_m": 12.0,
+  "assets": [
+    {
+      "id": "asset-alpha",
+      "position_m": [500.0, 350.0],
+      "altitude_m": 0.0,
+      "radius_m": 18.0
+    }
+  ],
+  "drones": [
+    {"id": "F1", "role": "friendly", "position_m": [428.0, 430.0], "altitude_m": 70.0, "velocity_mps": [0.0, 0.0], "max_speed_mps": 42.0, "sensor_range_m": 360.0, "engagement_range_m": 28.0},
+    {"id": "F2", "role": "friendly", "position_m": [452.0, 440.0], "altitude_m": 70.0, "velocity_mps": [0.0, 0.0], "max_speed_mps": 42.0, "sensor_range_m": 360.0, "engagement_range_m": 28.0},
+    {"id": "F3", "role": "friendly", "position_m": [476.0, 438.0], "altitude_m": 70.0, "velocity_mps": [0.0, 0.0], "max_speed_mps": 42.0, "sensor_range_m": 360.0, "engagement_range_m": 28.0},
+    {"id": "F4", "role": "friendly", "position_m": [500.0, 432.0], "altitude_m": 70.0, "velocity_mps": [0.0, 0.0], "max_speed_mps": 42.0, "sensor_range_m": 360.0, "engagement_range_m": 28.0},
+    {"id": "F5", "role": "friendly", "position_m": [524.0, 438.0], "altitude_m": 70.0, "velocity_mps": [0.0, 0.0], "max_speed_mps": 42.0, "sensor_range_m": 360.0, "engagement_range_m": 28.0},
+    {"id": "F6", "role": "friendly", "position_m": [548.0, 440.0], "altitude_m": 70.0, "velocity_mps": [0.0, 0.0], "max_speed_mps": 42.0, "sensor_range_m": 360.0, "engagement_range_m": 28.0},
+    {"id": "H1", "role": "hostile_ground", "position_m": [140.0, 90.0], "altitude_m": 80.0, "velocity_mps": [27.0, 18.0], "max_speed_mps": 32.0, "sensor_range_m": 300.0, "engagement_range_m": 22.0},
+    {"id": "H2", "role": "hostile_ground", "position_m": [850.0, 95.0], "altitude_m": 80.0, "velocity_mps": [-25.0, 19.0], "max_speed_mps": 31.0, "sensor_range_m": 300.0, "engagement_range_m": 22.0},
+    {"id": "H3", "role": "hostile_air", "position_m": [920.0, 520.0], "altitude_m": 95.0, "velocity_mps": [-32.0, -13.0], "max_speed_mps": 35.0, "sensor_range_m": 300.0, "engagement_range_m": 22.0},
+    {"id": "H4", "role": "hostile_ground", "position_m": [175.0, 620.0], "altitude_m": 80.0, "velocity_mps": [24.0, -20.0], "max_speed_mps": 32.0, "sensor_range_m": 300.0, "engagement_range_m": 22.0}
+  ]
+}

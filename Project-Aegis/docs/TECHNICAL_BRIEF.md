@@ -67,6 +67,7 @@ Generate deterministic telemetry:
 
 ```bash
 python3 -m aegis.cli --runs 1 --seed 42 --trace-jsonl reports/trace-42.jsonl
+python3 -m aegis.cli --runs 1 --seed 42 --scenario-config scenarios/baseline_asset_defense.json --trace-jsonl reports/baseline-scenario-trace.jsonl
 ```
 
 Open `web/index.html` only as a lightweight local viewer. The target product
@@ -79,8 +80,8 @@ rendering:
 
 ## Current Limitations
 
-- The baseline is a 2D kinematic simulation exported as 3D telemetry with a
-  fixed altitude placeholder.
+- The baseline policy reasons horizontally, while scenario manifests and
+  telemetry already carry altitude fields for ROS, Isaac Sim, and Unreal.
 - Sensor classification is assumed perfect.
 - Friendly losses are not yet modelled.
 - Communication is not modelled beyond the communication-denied baseline.

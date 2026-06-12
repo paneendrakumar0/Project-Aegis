@@ -41,7 +41,7 @@ def sample_asset(asset: Asset) -> EntitySample:
         alive=asset.alive,
         x_m=asset.position.x,
         y_m=asset.position.y,
-        z_m=0.0,
+        z_m=asset.altitude_m,
         vx_mps=0.0,
         vy_mps=0.0,
         vz_mps=0.0,
@@ -56,10 +56,10 @@ def sample_drone(drone: Drone) -> EntitySample:
         alive=drone.alive,
         x_m=drone.position.x,
         y_m=drone.position.y,
-        z_m=60.0,
+        z_m=drone.altitude_m,
         vx_mps=drone.velocity.x,
         vy_mps=drone.velocity.y,
-        vz_mps=0.0,
+        vz_mps=drone.vertical_velocity_mps,
     )
 
 
@@ -95,4 +95,3 @@ def write_jsonl(frames: list[TelemetryFrame], path: str | Path) -> None:
     with output_path.open("w", encoding="utf-8") as output_file:
         for frame in frames:
             output_file.write(json.dumps(asdict(frame), separators=(",", ":")) + "\n")
-

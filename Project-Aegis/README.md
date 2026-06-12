@@ -30,6 +30,7 @@ solution architecture to technical evaluators:
 aegis/              Core simulation and decision policy package
 docs/               Concept notes, architecture, and roadmap
 integrations/       ROS 2 bridge skeleton and future renderer integrations
+scenarios/          Versioned mission manifests for reproducible runs
 tests/              Unit and scenario tests
 web/                Lightweight browser viewer, not the final product renderer
 ```
@@ -55,6 +56,7 @@ Common reviewer commands:
 make test
 make smoke
 make report
+make scenario-trace
 ```
 
 To export per-run evaluation data:
@@ -63,6 +65,7 @@ To export per-run evaluation data:
 mkdir -p reports
 python3 -m aegis.cli --runs 100 --seed 42 --csv reports/baseline-100.csv
 python3 -m aegis.cli --runs 1 --seed 42 --trace-jsonl reports/trace-42.jsonl
+python3 -m aegis.cli --runs 1 --seed 42 --scenario-config scenarios/baseline_asset_defense.json --trace-jsonl reports/baseline-scenario-trace.jsonl
 ```
 
 ## Engineering Standard

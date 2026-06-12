@@ -18,7 +18,7 @@ product experience.
 ## Target Pipeline
 
 ```text
-Aegis Scenario Config
+Aegis Scenario Manifest
         |
         v
 Deterministic Simulation Core

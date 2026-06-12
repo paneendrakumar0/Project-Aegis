@@ -49,6 +49,7 @@ class Asset:
     id: str
     position: Vec2
     radius: float = 18.0
+    altitude_m: float = 0.0
     alive: bool = True
 
 
@@ -61,6 +62,8 @@ class Drone:
     max_speed: float
     sensor_range: float
     engagement_range: float
+    altitude_m: float = 60.0
+    vertical_velocity_mps: float = 0.0
     alive: bool = True
 
     @property
@@ -89,4 +92,3 @@ class Scenario:
     dt: float = 0.5
     max_time: float = 120.0
     intercept_radius: float = 12.0
-

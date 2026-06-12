@@ -4,6 +4,7 @@ import argparse
 import csv
 import sys
 
+from aegis.config import load_scenario_config
 from aegis.simulator import run_batch
 from aegis.scenario import default_scenario
 from aegis.simulator import run_recorded_simulation
@@ -16,6 +17,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=0, help="Base random seed.")
     parser.add_argument("--friendlies", type=int, default=8, help="Friendly drone count.")
     parser.add_argument("--hostiles", type=int, default=10, help="Hostile drone count.")
+    parser.add_argument("--scenario-config", type=str, default="", help="Optional JSON scenario manifest.")
     parser.add_argument("--csv", type=str, default="", help="Optional path for per-run CSV output.")
     parser.add_argument("--trace-jsonl", type=str, default="", help="Optional JSONL telemetry trace for the first run.")
     return parser
@@ -23,7 +25,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    results = run_batch(args.runs, seed=args.seed, friendly_count=args.friendlies, hostile_count=args.hostiles)
+    if args.scenario_config:
+        scenario = load_scenario_config(args.scenario_config)
+        results = [run_recorded_simulation(scenario, seed=args.seed + index, record=False).result for index in range(args.runs)]
+    else:
+        results = run_batch(args.runs, seed=args.seed, friendly_count=args.friendlies, hostile_count=args.hostiles)
 
     success_rate = sum(1 for result in results if result.success) / max(len(results), 1)
     asset_survival = sum(result.assets_survived / result.assets_total for result in results) / max(len(results), 1)
@@ -46,8 +52,13 @@ def main(argv: list[str] | None = None) -> int:
                 writer.writerow(row)
 
     if args.trace_jsonl:
+        scenario = (
+            load_scenario_config(args.scenario_config)
+            if args.scenario_config
+            else default_scenario(seed=args.seed, friendly_count=args.friendlies, hostile_count=args.hostiles)
+        )
         recorded = run_recorded_simulation(
-            default_scenario(seed=args.seed, friendly_count=args.friendlies, hostile_count=args.hostiles),
+            scenario,
             seed=args.seed,
             record=True,
         )
