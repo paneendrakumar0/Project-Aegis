@@ -11,6 +11,8 @@
 ## Phase 2: Technical Depth
 
 - Add multi-asset scenarios.
+- Upgrade the simulator from horizontal kinematics to bounded 3D vehicle
+  dynamics.
 - Model sensing range, classification uncertainty, and missed detections.
 - Add communication-degraded modes.
 - Add structured scenario configuration files.
@@ -20,6 +22,7 @@
 
 - Add architecture diagrams and evaluation report templates.
 - Produce a recorded demo scenario.
+- Produce ROS/Gazebo playback and a `rosbag2` evidence artifact.
 - Create a BEL/DRDO-facing technical presentation.
 - Add benchmark comparisons between baseline, greedy, and coordinated policies.
 

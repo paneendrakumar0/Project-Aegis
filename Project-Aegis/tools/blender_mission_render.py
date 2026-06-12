@@ -44,6 +44,15 @@ def scene_xy(sample: dict) -> tuple[float, float, float]:
 def make_material(name: str, color: tuple[float, float, float, float]) -> bpy.types.Material:
     material = bpy.data.materials.new(name)
     material.diffuse_color = color
+    material.use_nodes = True
+    bsdf = material.node_tree.nodes.get("Principled BSDF")
+    if bsdf:
+        bsdf.inputs["Base Color"].default_value = color
+        bsdf.inputs["Roughness"].default_value = 0.72
+        if color[3] < 1:
+            bsdf.inputs["Alpha"].default_value = color[3]
+            material.blend_method = "BLEND"
+            material.use_screen_refraction = True
     return material
 
 
@@ -71,62 +80,156 @@ def set_render_settings(out_dir: Path, fps: int, frame_count: int) -> None:
 
 
 def add_environment() -> None:
-    bpy.ops.mesh.primitive_plane_add(size=24, location=(0, 0, -0.02))
+    bpy.ops.mesh.primitive_plane_add(size=34, location=(0, 0, -0.04))
     ground = bpy.context.object
-    ground.name = "matte tactical ground plane"
-    ground.data.materials.append(make_material("ground charcoal", (0.025, 0.032, 0.038, 1)))
+    ground.name = "semi arid operational theater"
+    ground.data.materials.append(make_material("dusty terrain", (0.16, 0.15, 0.13, 1)))
 
-    grid_material = make_material("grid line", (0.08, 0.18, 0.22, 1))
-    for index in range(-12, 13):
+    grid_material = make_material("subtle coordinate grid", (0.05, 0.13, 0.14, 1))
+    for index in range(-16, 17):
         bpy.ops.mesh.primitive_cube_add(size=1, location=(index, 0, 0.002))
         line = bpy.context.object
         line.name = "grid_x"
-        line.dimensions = (0.01, 24, 0.004)
+        line.dimensions = (0.006, 34, 0.004)
         line.data.materials.append(grid_material)
         bpy.ops.mesh.primitive_cube_add(size=1, location=(0, index, 0.003))
         line = bpy.context.object
         line.name = "grid_y"
-        line.dimensions = (24, 0.01, 0.004)
+        line.dimensions = (34, 0.006, 0.004)
         line.data.materials.append(grid_material)
+
+    road_material = make_material("service road asphalt", (0.075, 0.075, 0.07, 1))
+    for location, dimensions, rotation in [
+        ((0, -1.35, 0.01), (16, 0.38, 0.02), 0),
+        ((-2.4, 0.5, 0.012), (0.36, 7.6, 0.02), math.radians(13)),
+    ]:
+        bpy.ops.mesh.primitive_cube_add(size=1, location=location, rotation=(0, 0, rotation))
+        road = bpy.context.object
+        road.name = "service road"
+        road.dimensions = dimensions
+        road.data.materials.append(road_material)
+
+    building_material = make_material("reinforced concrete", (0.34, 0.35, 0.32, 1))
+    roof_material = make_material("dark roof", (0.08, 0.085, 0.08, 1))
+    for x, y, sx, sy, sz in [
+        (-1.25, -0.25, 0.9, 0.65, 0.35),
+        (1.05, -0.55, 1.1, 0.55, 0.32),
+        (0.25, 0.85, 0.72, 0.75, 0.28),
+        (-2.15, 0.95, 0.58, 0.48, 0.24),
+    ]:
+        bpy.ops.mesh.primitive_cube_add(size=1, location=(x, y, sz / 2))
+        building = bpy.context.object
+        building.name = "protected installation structure"
+        building.dimensions = (sx, sy, sz)
+        building.data.materials.append(building_material)
+        bpy.ops.mesh.primitive_cube_add(size=1, location=(x, y, sz + 0.025))
+        roof = bpy.context.object
+        roof.name = "low observable roof"
+        roof.dimensions = (sx + 0.08, sy + 0.08, 0.05)
+        roof.data.materials.append(roof_material)
+
+    wall_material = make_material("perimeter wall", (0.26, 0.27, 0.24, 1))
+    for location, dimensions in [
+        ((0, 1.95, 0.16), (5.4, 0.12, 0.32)),
+        ((0, -1.95, 0.16), (5.4, 0.12, 0.32)),
+        ((2.7, 0, 0.16), (0.12, 4.0, 0.32)),
+        ((-2.7, 0, 0.16), (0.12, 4.0, 0.32)),
+    ]:
+        bpy.ops.mesh.primitive_cube_add(size=1, location=location)
+        wall = bpy.context.object
+        wall.name = "compound perimeter wall"
+        wall.dimensions = dimensions
+        wall.data.materials.append(wall_material)
+
+    mast_material = make_material("sensor mast", (0.16, 0.17, 0.17, 1))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.035, depth=1.15, location=(2.15, 1.35, 0.58))
+    mast = bpy.context.object
+    mast.name = "radar sensor mast"
+    mast.data.materials.append(mast_material)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=0.18, location=(2.15, 1.35, 1.2))
+    dome = bpy.context.object
+    dome.name = "sensor radome"
+    dome.data.materials.append(make_material("radome white", (0.75, 0.78, 0.76, 1)))
 
 
 def add_asset(sample: dict, material: bpy.types.Material) -> bpy.types.Object:
     x, y, z = scene_xy(sample)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.32, depth=0.22, location=(x, y, z + 0.11))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=0.22, depth=0.18, location=(x, y, z + 0.11))
     asset = bpy.context.object
     asset.name = sample["id"]
     asset.data.materials.append(material)
 
-    bpy.ops.mesh.primitive_torus_add(major_radius=2.1, minor_radius=0.012, location=(x, y, z + 0.025))
+    bpy.ops.mesh.primitive_torus_add(major_radius=2.15, minor_radius=0.008, location=(x, y, z + 0.035))
     ring = bpy.context.object
     ring.name = f"{sample['id']}_defense_radius"
-    ring.data.materials.append(make_material("asset ring", (0.05, 0.85, 0.45, 0.38)))
+    ring.data.materials.append(make_material("asset protected radius", (0.05, 0.85, 0.45, 0.24)))
     return asset
 
 
-def add_drone(sample: dict, material: bpy.types.Material) -> bpy.types.Object:
-    x, y, z = scene_xy(sample)
-    bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=0.18, depth=0.52, location=(x, y, z))
-    drone = bpy.context.object
-    drone.name = sample["id"]
-    drone.rotation_euler[1] = math.radians(90)
-    drone.data.materials.append(material)
+def parent_keep_transform(child: bpy.types.Object, parent: bpy.types.Object) -> None:
+    child.parent = parent
+    child.matrix_parent_inverse = parent.matrix_world.inverted()
 
-    rotor_material = make_material(f"{sample['id']}_rotor", (0.02, 0.024, 0.028, 1))
-    for offset_x, offset_y in [(0.2, 0.2), (0.2, -0.2), (-0.2, 0.2), (-0.2, -0.2)]:
-        bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.09, depth=0.018, location=(x + offset_x, y + offset_y, z + 0.03))
-        rotor = bpy.context.object
-        rotor.name = f"{sample['id']}_rotor"
-        rotor.data.materials.append(rotor_material)
-        rotor.parent = drone
-    return drone
+
+def add_arm(root: bpy.types.Object, name: str, location: tuple[float, float, float], rotation_z: float, material: bpy.types.Material) -> None:
+    bpy.ops.mesh.primitive_cube_add(size=1, location=location, rotation=(0, 0, rotation_z))
+    arm = bpy.context.object
+    arm.name = name
+    arm.dimensions = (0.62, 0.045, 0.035)
+    arm.data.materials.append(material)
+    parent_keep_transform(arm, root)
+
+
+def add_rotor(root: bpy.types.Object, name: str, location: tuple[float, float, float], material: bpy.types.Material) -> bpy.types.Object:
+    bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.13, depth=0.018, location=location)
+    rotor = bpy.context.object
+    rotor.name = name
+    rotor.data.materials.append(material)
+    parent_keep_transform(rotor, root)
+    return rotor
+
+
+def add_drone(sample: dict, accent_material: bpy.types.Material, body_material: bpy.types.Material) -> tuple[bpy.types.Object, list[bpy.types.Object]]:
+    x, y, z = scene_xy(sample)
+    root = bpy.data.objects.new(sample["id"], None)
+    bpy.context.collection.objects.link(root)
+    root.empty_display_type = "PLAIN_AXES"
+    root.empty_display_size = 0.25
+    root.location = (x, y, z)
+
+    children: list[bpy.types.Object] = []
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(x, y, z))
+    body = bpy.context.object
+    body.name = f"{sample['id']}_fuselage"
+    body.dimensions = (0.42, 0.18, 0.12)
+    body.data.materials.append(body_material)
+    parent_keep_transform(body, root)
+    children.append(body)
+
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=8, radius=0.075, location=(x + 0.24, y, z + 0.015))
+    nose = bpy.context.object
+    nose.name = f"{sample['id']}_sensor_nose"
+    nose.data.materials.append(accent_material)
+    parent_keep_transform(nose, root)
+    children.append(nose)
+
+    for angle in [math.radians(35), math.radians(-35), math.radians(145), math.radians(-145)]:
+        add_arm(root, f"{sample['id']}_carbon_arm", (x, y, z), angle, body_material)
+
+    rotor_material = make_material(f"{sample['id']}_rotor_blur", (0.015, 0.018, 0.018, 0.72))
+    rotor_offsets = [(0.32, 0.32), (0.32, -0.32), (-0.32, 0.32), (-0.32, -0.32)]
+    for index, (offset_x, offset_y) in enumerate(rotor_offsets, start=1):
+        rotor = add_rotor(root, f"{sample['id']}_rotor_{index}", (x + offset_x, y + offset_y, z + 0.04), rotor_material)
+        children.append(rotor)
+
+    return root, children
 
 
 def add_trail(samples: list[dict], material: bpy.types.Material, name: str) -> None:
     curve = bpy.data.curves.new(name, type="CURVE")
     curve.dimensions = "3D"
     curve.resolution_u = 2
-    curve.bevel_depth = 0.012
+    curve.bevel_depth = 0.006
     polyline = curve.splines.new("POLY")
     polyline.points.add(len(samples) - 1)
     for point, sample in zip(polyline.points, samples):
@@ -153,6 +256,41 @@ def keyframe_entity(obj: bpy.types.Object, samples_by_frame: list[dict]) -> None
         obj.keyframe_insert(data_path="hide_render", frame=frame_index)
 
 
+def keyframe_drone(root: bpy.types.Object, children: list[bpy.types.Object], samples_by_frame: list[dict]) -> None:
+    for frame_index, sample in enumerate(samples_by_frame, start=1):
+        x, y, z = scene_xy(sample)
+        root.location = (x, y, z)
+        vx = float(sample["vx_mps"])
+        vy = float(sample["vy_mps"])
+        if vx != 0 or vy != 0:
+            root.rotation_euler[2] = math.atan2(vy, vx)
+        root.keyframe_insert(data_path="location", frame=frame_index)
+        root.keyframe_insert(data_path="rotation_euler", frame=frame_index)
+        for child in children:
+            if "rotor" in child.name:
+                child.rotation_euler[2] = frame_index * math.radians(55)
+                child.keyframe_insert(data_path="rotation_euler", frame=frame_index)
+            child.hide_viewport = not sample["alive"]
+            child.hide_render = not sample["alive"]
+            child.keyframe_insert(data_path="hide_viewport", frame=frame_index)
+            child.keyframe_insert(data_path="hide_render", frame=frame_index)
+
+
+def add_neutralization_markers(samples_by_entity: dict[str, list[dict]], material: bpy.types.Material) -> None:
+    for entity_id, samples in samples_by_entity.items():
+        if not entity_id.startswith("H"):
+            continue
+        alive_samples = [sample for sample in samples if sample["alive"]]
+        if not alive_samples or alive_samples[-1] is samples[-1]:
+            continue
+        x, y, z = scene_xy(alive_samples[-1])
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=0.28, location=(x, y, z))
+        marker = bpy.context.object
+        marker.name = f"{entity_id}_disabled_marker"
+        marker.scale = (1, 1, 0.45)
+        marker.data.materials.append(material)
+
+
 def add_camera_and_lights() -> None:
     bpy.ops.object.light_add(type="SUN", location=(0, 0, 8))
     sun = bpy.context.object
@@ -166,17 +304,17 @@ def add_camera_and_lights() -> None:
     area.data.energy = 550
     area.data.size = 6
 
-    bpy.ops.object.camera_add(location=(0, -12.5, 8.5), rotation=(math.radians(58), 0, 0))
+    bpy.ops.object.camera_add(location=(0.2, -13.8, 8.4), rotation=(math.radians(58), 0, math.radians(2)))
     camera = bpy.context.object
     bpy.context.scene.camera = camera
     camera.data.lens = 32
 
 
 def add_title() -> None:
-    bpy.ops.object.text_add(location=(-6.0, -5.6, 0.05), rotation=(math.radians(70), 0, 0))
+    bpy.ops.object.text_add(location=(-5.8, -4.8, 0.05), rotation=(math.radians(70), 0, 0))
     text = bpy.context.object
     text.name = "mission_title"
-    text.data.body = "PROJECT AEGIS | TELEMETRY-DRIVEN SWARM SIMULATION"
+    text.data.body = "PROJECT AEGIS | DEFENDED ASSET SWARM SIMULATION"
     text.data.align_x = "LEFT"
     text.data.size = 0.32
     text.data.materials.append(make_material("title white", (0.85, 0.92, 0.96, 1)))
@@ -192,11 +330,11 @@ def render(frames: list[dict], out_dir: Path, fps: int) -> None:
 
     materials = {
         "asset": make_material("protected asset green", (0.05, 0.9, 0.45, 1)),
-        "friendly": make_material("friendly blue", (0.02, 0.52, 0.95, 1)),
-        "hostile_ground": make_material("hostile red", (0.95, 0.04, 0.15, 1)),
-        "hostile_air": make_material("hostile amber", (1.0, 0.52, 0.04, 1)),
-        "trail_friendly": make_material("trail friendly", (0.0, 0.62, 1.0, 0.55)),
-        "trail_hostile": make_material("trail hostile", (1.0, 0.12, 0.18, 0.5)),
+        "drone_body": make_material("matte carbon composite", (0.025, 0.028, 0.028, 1)),
+        "friendly": make_material("friendly identification light", (0.02, 0.45, 0.95, 1)),
+        "hostile_ground": make_material("hostile ground threat light", (0.95, 0.04, 0.15, 1)),
+        "hostile_air": make_material("hostile air threat light", (1.0, 0.52, 0.04, 1)),
+        "disabled": make_material("disabled drone marker smoke", (0.42, 0.42, 0.38, 0.35)),
     }
 
     entity_ids = [sample["id"] for sample in frames[0]["entities"]]
@@ -212,11 +350,11 @@ def render(frames: list[dict], out_dir: Path, fps: int) -> None:
         if sample["kind"] == "asset":
             add_asset(sample, materials["asset"])
             continue
-        material = materials[sample["role"]]
-        obj = add_drone(sample, material)
-        keyframe_entity(obj, samples[sample["id"]])
-        trail_material = materials["trail_friendly"] if sample["role"] == "friendly" else materials["trail_hostile"]
-        add_trail(samples[sample["id"]], trail_material, f"{sample['id']}_trajectory")
+        accent_material = materials[sample["role"]]
+        obj, children = add_drone(sample, accent_material, materials["drone_body"])
+        keyframe_drone(obj, children, samples[sample["id"]])
+
+    add_neutralization_markers(samples, materials["disabled"])
 
     bpy.context.scene.frame_set(len(frames) // 2)
     bpy.context.scene.render.filepath = str(out_dir / "aegis_blender_snapshot.png")

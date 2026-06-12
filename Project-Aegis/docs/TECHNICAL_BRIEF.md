@@ -82,6 +82,7 @@ rendering:
 
 - The baseline policy reasons horizontally, while scenario manifests and
   telemetry already carry altitude fields for ROS, Isaac Sim, and Unreal.
+- The Blender scene is an interim render, not the final visual product.
 - Sensor classification is assumed perfect.
 - Friendly losses are not yet modelled.
 - Communication is not modelled beyond the communication-denied baseline.
@@ -96,3 +97,4 @@ rendering:
 - Add benchmark policies for evaluator comparison.
 - Add a formal evaluation notebook or generated PDF report.
 - Add ROS 2 bridge packages and high-fidelity rendering integration.
+- Execute the BEL-grade validation plan in `docs/BEL_VALIDATION_PLAN.md`.

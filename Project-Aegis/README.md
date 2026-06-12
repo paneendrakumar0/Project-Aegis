@@ -139,6 +139,8 @@ ros2 bag record /clock /tf /aegis/entities /aegis/metrics -o reports/bags/trace-
 
 High-fidelity rendering is documented in `docs/RENDERING_PIPELINE.md`.
 Blender interim rendering is documented in `docs/BLENDER_RENDERING.md`.
+BEL-grade validation requirements are documented in
+`docs/BEL_VALIDATION_PLAN.md`.
 Workstation setup and install priorities are documented in
 `docs/WORKSTATION_SETUP.md`.
 
