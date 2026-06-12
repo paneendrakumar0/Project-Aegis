@@ -45,6 +45,14 @@ python3 -m aegis.cli --runs 25 --seed 42
 
 Open `web/index.html` in a browser for the lightweight visual demo.
 
+Common reviewer commands:
+
+```bash
+make test
+make smoke
+make report
+```
+
 To export per-run evaluation data:
 
 ```bash
