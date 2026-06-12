@@ -1,4 +1,4 @@
-.PHONY: test smoke report trace
+.PHONY: test smoke report trace scenario-trace media
 
 test:
 	python3 -m pytest
@@ -17,3 +17,6 @@ trace:
 scenario-trace:
 	mkdir -p reports
 	python3 -m aegis.cli --runs 1 --seed 42 --scenario-config scenarios/baseline_asset_defense.json --trace-jsonl reports/baseline-scenario-trace.jsonl
+
+media: scenario-trace
+	python3 tools/render_trace_media.py --trace reports/baseline-scenario-trace.jsonl --out-dir assets/media
