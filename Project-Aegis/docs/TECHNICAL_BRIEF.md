@@ -26,7 +26,7 @@ Local Drone Policy ---> Threat Score ---> Target Decision ---> Steering Vector
 Simulation Engine <----------- Engagement / Asset Impact Resolution
         |
         v
-Metrics + CSV Reports + Browser Visualization
+Metrics + CSV Reports + Telemetry + ROS/Isaac/Unreal Visualization
 ```
 
 ## Baseline Policy
@@ -63,17 +63,24 @@ The report command writes `reports/baseline-100.csv` with per-run metrics:
 
 ## Demonstration Path
 
-Open `web/index.html` to show:
+Generate deterministic telemetry:
 
-- Protected asset and defense region.
-- Friendly interceptors.
-- Ground-attack and air-threat hostiles.
-- Threat rings for ground-attack hostiles.
-- Live assignment lines and attendance metrics.
+```bash
+python3 -m aegis.cli --runs 1 --seed 42 --trace-jsonl reports/trace-42.jsonl
+```
+
+Open `web/index.html` only as a lightweight local viewer. The target product
+demonstration path is ROS 2 bag playback plus Isaac Sim or Unreal Engine
+rendering:
+
+- ROS 2 bag recording from Aegis telemetry.
+- Isaac Sim robotics-grade playback with sensor overlays.
+- Unreal Engine cinematic mission video generated from the same telemetry.
 
 ## Current Limitations
 
-- The baseline is a 2D kinematic simulation.
+- The baseline is a 2D kinematic simulation exported as 3D telemetry with a
+  fixed altitude placeholder.
 - Sensor classification is assumed perfect.
 - Friendly losses are not yet modelled.
 - Communication is not modelled beyond the communication-denied baseline.
@@ -87,3 +94,4 @@ Open `web/index.html` to show:
 - Add communication-available and communication-denied comparison modes.
 - Add benchmark policies for evaluator comparison.
 - Add a formal evaluation notebook or generated PDF report.
+- Add ROS 2 bridge packages and high-fidelity rendering integration.

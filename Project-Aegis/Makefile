@@ -1,4 +1,4 @@
-.PHONY: test smoke report
+.PHONY: test smoke report trace
 
 test:
 	python3 -m pytest
@@ -10,3 +10,6 @@ report:
 	mkdir -p reports
 	python3 -m aegis.cli --runs 100 --seed 42 --csv reports/baseline-100.csv
 
+trace:
+	mkdir -p reports
+	python3 -m aegis.cli --runs 1 --seed 42 --trace-jsonl reports/trace-42.jsonl

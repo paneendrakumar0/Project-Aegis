@@ -30,7 +30,7 @@ solution architecture to technical evaluators:
 aegis/              Core simulation and decision policy package
 docs/               Concept notes, architecture, and roadmap
 tests/              Unit and scenario tests
-web/                Browser-based visual simulation demo
+web/                Lightweight browser viewer, not the final product renderer
 ```
 
 ## Quick Start
@@ -44,6 +44,9 @@ python3 -m aegis.cli --runs 25 --seed 42
 ```
 
 Open `web/index.html` in a browser for the lightweight visual demo.
+For industrial visualization, use the telemetry route described in
+`docs/INDUSTRIAL_SIMULATION_PLAN.md`, `docs/ROS2_BAG_PIPELINE.md`, and
+`docs/RENDERING_PIPELINE.md`.
 
 Common reviewer commands:
 
@@ -58,6 +61,7 @@ To export per-run evaluation data:
 ```bash
 mkdir -p reports
 python3 -m aegis.cli --runs 100 --seed 42 --csv reports/baseline-100.csv
+python3 -m aegis.cli --runs 1 --seed 42 --trace-jsonl reports/trace-42.jsonl
 ```
 
 ## Engineering Standard
