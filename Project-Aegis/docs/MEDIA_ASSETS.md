@@ -17,6 +17,8 @@ renders:
 - `assets/media/simulation-pipeline.png`
 - `assets/media/mission-snapshot.png`
 - `assets/media/mission-replay.gif`
+- `assets/media/mission-recording.mp4`
+- `assets/media/demo-manifest.json`
 
 ## Source Of Truth
 
@@ -29,5 +31,6 @@ tools/render_trace_media.py
 ```
 
 The GIF and PNG files are committed intentionally because they are part of the
-public project presentation. Generated CSV and JSONL report outputs remain
-ignored unless a release package needs to include them.
+public project presentation. The MP4 is committed as a compact mission
+recording for reviewers who prefer video playback. Generated CSV and JSONL
+report outputs remain ignored unless a release package needs to include them.

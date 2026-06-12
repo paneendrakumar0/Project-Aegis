@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import tempfile
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -140,6 +142,52 @@ def draw_architecture(path: Path) -> None:
     image.save(path)
 
 
+def write_mp4(frames: list[dict], path: Path, fps: int = 8) -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        frame_dir = Path(temp_dir)
+        for index, frame in enumerate(frames):
+            image = draw_frame(frame, "Project Aegis Mission Recording")
+            image.save(frame_dir / f"frame_{index:04d}.png")
+
+        command = [
+            "ffmpeg",
+            "-y",
+            "-framerate",
+            str(fps),
+            "-i",
+            str(frame_dir / "frame_%04d.png"),
+            "-vf",
+            "pad=ceil(iw/2)*2:ceil(ih/2)*2",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            str(path),
+        ]
+        subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def write_demo_manifest(path: Path, trace_path: Path, out_dir: Path, frame_count: int) -> None:
+    manifest = {
+        "schema_version": 1,
+        "scenario": "scenarios/baseline_asset_defense.json",
+        "trace": str(trace_path),
+        "frame_count": frame_count,
+        "media": {
+            "pipeline_png": str(out_dir / "simulation-pipeline.png"),
+            "snapshot_png": str(out_dir / "mission-snapshot.png"),
+            "replay_gif": str(out_dir / "mission-replay.gif"),
+            "recording_mp4": str(out_dir / "mission-recording.mp4"),
+        },
+        "commands": {
+            "trace": "make scenario-trace",
+            "media": "make media",
+            "tests": "make test",
+        },
+    }
+    path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Render Project Aegis README media from telemetry.")
     parser.add_argument("--trace", default="reports/baseline-scenario-trace.jsonl")
@@ -163,6 +211,8 @@ def main() -> int:
     )
     draw_frame(frames[len(frames) // 2], "Project Aegis Tactical Snapshot").save(out_dir / "mission-snapshot.png")
     draw_architecture(out_dir / "simulation-pipeline.png")
+    write_mp4(frames, out_dir / "mission-recording.mp4")
+    write_demo_manifest(out_dir / "demo-manifest.json", Path(args.trace), out_dir, len(frames))
     print(f"wrote media to {out_dir}")
     return 0
 

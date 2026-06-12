@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "scenario": "scenarios/baseline_asset_defense.json",
+  "trace": "reports/baseline-scenario-trace.jsonl",
+  "frame_count": 24,
+  "media": {
+    "pipeline_png": "assets/media/simulation-pipeline.png",
+    "snapshot_png": "assets/media/mission-snapshot.png",
+    "replay_gif": "assets/media/mission-replay.gif",
+    "recording_mp4": "assets/media/mission-recording.mp4"
+  },
+  "commands": {
+    "trace": "make scenario-trace",
+    "media": "make media",
+    "tests": "make test"
+  }
+}

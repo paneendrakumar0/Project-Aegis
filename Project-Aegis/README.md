@@ -18,6 +18,8 @@ real-world targeting instructions, or deployable weapon-control logic.
 
 ![Project Aegis tactical snapshot](assets/media/mission-snapshot.png)
 
+Mission recording: [assets/media/mission-recording.mp4](assets/media/mission-recording.mp4)
+
 The visuals above are generated from the reproducible scenario manifest at
 `scenarios/baseline_asset_defense.json`, not hand-drawn. The same telemetry
 stream is the basis for ROS 2 bag playback and future Isaac Sim or Unreal
@@ -95,6 +97,8 @@ Generated media:
 - `assets/media/simulation-pipeline.png`
 - `assets/media/mission-snapshot.png`
 - `assets/media/mission-replay.gif`
+- `assets/media/mission-recording.mp4`
+- `assets/media/demo-manifest.json`
 
 ## Recording Pipeline
 
