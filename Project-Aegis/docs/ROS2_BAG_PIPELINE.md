@@ -24,7 +24,7 @@ Each line contains:
 
 ## Proposed ROS 2 Messages
 
-Initial custom interface package: `aegis_msgs`.
+Initial custom interface package: `integrations/ros2/aegis_msgs`.
 
 ```text
 aegis_msgs/msg/EntityState.msg
@@ -57,7 +57,7 @@ float64 attendance_rate
 
 ## Bridge Node Design
 
-Package: `aegis_ros_bridge`
+Package: `integrations/ros2/aegis_ros_bridge`
 
 Node: `telemetry_replay_node`
 
@@ -73,6 +73,27 @@ Outputs:
 - `/tf`
 - `/aegis/entities`
 - `/aegis/metrics`
+
+## Workspace Build
+
+From a ROS 2 environment:
+
+```bash
+mkdir -p ros2_ws/src
+cp -r integrations/ros2/aegis_msgs ros2_ws/src/
+cp -r integrations/ros2/aegis_ros_bridge ros2_ws/src/
+cd ros2_ws
+colcon build
+source install/setup.bash
+```
+
+Replay generated telemetry:
+
+```bash
+ros2 run aegis_ros_bridge telemetry_replay_node --ros-args \
+  -p trace_path:=/absolute/path/to/reports/trace-42.jsonl \
+  -p rate_hz:=20.0
+```
 
 ## Recording Command
 

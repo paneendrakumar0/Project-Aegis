@@ -29,6 +29,7 @@ solution architecture to technical evaluators:
 ```text
 aegis/              Core simulation and decision policy package
 docs/               Concept notes, architecture, and roadmap
+integrations/       ROS 2 bridge skeleton and future renderer integrations
 tests/              Unit and scenario tests
 web/                Lightweight browser viewer, not the final product renderer
 ```
