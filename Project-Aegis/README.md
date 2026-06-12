@@ -18,6 +18,12 @@ metrics, ROS/Gazebo integration, and future Isaac Sim or Unreal Engine renders.
 
 ![Project Aegis industrial simulation pipeline](assets/media/simulation-pipeline.png)
 
+Interim Blender render:
+
+![Project Aegis Blender mission render](assets/blender/aegis_blender_snapshot.png)
+
+Mission video: [assets/blender/aegis_blender_mission.mp4](assets/blender/aegis_blender_mission.mp4)
+
 ## Current Objective
 
 Build a credible, reviewable prototype that can be shown as a software
@@ -36,6 +42,7 @@ solution architecture to technical evaluators:
 
 ```text
 assets/media/       Generated presentation media and demo manifest
+assets/blender/     Blender-rendered mission snapshot and video
 aegis/              Core simulation and decision policy package
 docs/               Concept notes, architecture, and roadmap
 integrations/       ROS 2 bridge skeleton and future renderer integrations
@@ -68,6 +75,7 @@ make smoke
 make report
 make scenario-trace
 make gazebo-scene
+make blender-render
 make media
 ```
 
@@ -93,6 +101,8 @@ Generated media:
 - `assets/media/mission-replay.gif`
 - `assets/media/mission-recording.mp4`
 - `assets/media/demo-manifest.json`
+- `assets/blender/aegis_blender_snapshot.png`
+- `assets/blender/aegis_blender_mission.mp4`
 
 Gazebo artifacts:
 
@@ -128,6 +138,7 @@ ros2 bag record /clock /tf /aegis/entities /aegis/metrics -o reports/bags/trace-
 ```
 
 High-fidelity rendering is documented in `docs/RENDERING_PIPELINE.md`.
+Blender interim rendering is documented in `docs/BLENDER_RENDERING.md`.
 Workstation setup and install priorities are documented in
 `docs/WORKSTATION_SETUP.md`.
 

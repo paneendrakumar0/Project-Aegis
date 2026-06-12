@@ -19,6 +19,8 @@ renders:
 - `assets/media/mission-replay.gif`
 - `assets/media/mission-recording.mp4`
 - `assets/media/demo-manifest.json`
+- `assets/blender/aegis_blender_snapshot.png`
+- `assets/blender/aegis_blender_mission.mp4`
 
 ## Source Of Truth
 
@@ -34,3 +36,6 @@ The GIF and PNG files are committed intentionally because they are part of the
 public project presentation. The MP4 is committed as a compact mission
 recording for reviewers who prefer video playback. Generated CSV and JSONL
 report outputs remain ignored unless a release package needs to include them.
+
+Blender outputs are committed separately under `assets/blender/` because they
+are the stronger interim visual artifacts for stakeholder review.

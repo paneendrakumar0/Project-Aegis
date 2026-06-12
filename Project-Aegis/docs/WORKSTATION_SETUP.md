@@ -38,6 +38,9 @@ Suggested package:
 sudo apt install blender
 ```
 
+Blender is now installed on this workstation and `make blender-render` is the
+current local cinematic-render command.
+
 ### 3. Add Isaac Sim For Robotics-Grade Sensor Simulation
 
 Install Isaac Sim when the project needs:
