@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Aegis Swarm Simulator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101418;
+      --panel: #171d23;
+      --panel-2: #202832;
+      --text: #edf3f8;
+      --muted: #9dafbd;
+      --grid: rgba(255, 255, 255, 0.07);
+      --friendly: #4cc9f0;
+      --hostile-ground: #ff5c7a;
+      --hostile-air: #ffb84d;
+      --asset: #6ee7a8;
+      --line: rgba(237, 243, 248, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      min-height: 100vh;
+    }
+
+    main {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-width: 0;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 720;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      min-height: 0;
+      padding: 16px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 520px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+        #111820;
+      background-size: 32px 32px;
+    }
+
+    aside {
+      border-left: 1px solid var(--line);
+      background: var(--panel);
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .group {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--friendly);
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #26313d;
+      color: var(--text);
+      min-height: 38px;
+      border-radius: 8px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #30404d;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .metric {
+      padding: 10px;
+      border-radius: 8px;
+      background: #121820;
+      border: 1px solid var(--line);
+    }
+
+    .metric b {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 3px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      canvas {
+        min-height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <main>
+      <header>
+        <div>
+          <h1>Project Aegis Swarm Simulator</h1>
+          <div class="subtitle">Decentralized local threat scoring and intercept steering</div>
+        </div>
+        <button id="toggle" type="button">Pause</button>
+      </header>
+      <div class="canvas-wrap">
+        <canvas id="sim" width="1000" height="700"></canvas>
+      </div>
+    </main>
+
+    <aside>
+      <div class="controls">
+        <div class="group stats">
+          <div class="metric"><b id="time">0.0s</b><span>Elapsed</span></div>
+          <div class="metric"><b id="asset">Alive</b><span>Asset</span></div>
+          <div class="metric"><b id="neutralized">0</b><span>Neutralized</span></div>
+          <div class="metric"><b id="attendance">100%</b><span>Attendance</span></div>
+        </div>
+
+        <div class="group">
+          <label>Friendly drones <strong id="friendlyValue">8</strong></label>
+          <input id="friendlies" type="range" min="3" max="16" value="8">
+          <label>Hostile drones <strong id="hostileValue">12</strong></label>
+          <input id="hostiles" type="range" min="4" max="24" value="12">
+          <label>Simulation speed <strong id="speedValue">1.0x</strong></label>
+          <input id="speed" type="range" min="0.5" max="3" value="1" step="0.5">
+          <button id="reset" type="button">Reset Scenario</button>
+        </div>
+
+        <div class="group legend">
+          <div class="legend-row"><span class="dot" style="background: var(--asset)"></span>Protected ground asset</div>
+          <div class="legend-row"><span class="dot" style="background: var(--friendly)"></span>Friendly interceptor</div>
+          <div class="legend-row"><span class="dot" style="background: var(--hostile-ground)"></span>Ground-attack hostile</div>
+          <div class="legend-row"><span class="dot" style="background: var(--hostile-air)"></span>Air-threat hostile</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("sim");
+    const ctx = canvas.getContext("2d");
+    const ui = {
+      toggle: document.getElementById("toggle"),
+      reset: document.getElementById("reset"),
+      friendlies: document.getElementById("friendlies"),
+      hostiles: document.getElementById("hostiles"),
+      speed: document.getElementById("speed"),
+      friendlyValue: document.getElementById("friendlyValue"),
+      hostileValue: document.getElementById("hostileValue"),
+      speedValue: document.getElementById("speedValue"),
+      time: document.getElementById("time"),
+      asset: document.getElementById("asset"),
+      neutralized: document.getElementById("neutralized"),
+      attendance: document.getElementById("attendance")
+    };
+
+    const colors = {
+      friendly: "#4cc9f0",
+      hostileGround: "#ff5c7a",
+      hostileAir: "#ffb84d",
+      asset: "#6ee7a8"
+    };
+
+    let paused = false;
+    let state = createScenario();
+
+    function vec(x, y) {
+      return { x, y };
+    }
+
+    function add(a, b) {
+      return vec(a.x + b.x, a.y + b.y);
+    }
+
+    function sub(a, b) {
+      return vec(a.x - b.x, a.y - b.y);
+    }
+
+    function mul(a, s) {
+      return vec(a.x * s, a.y * s);
+    }
+
+    function length(a) {
+      return Math.hypot(a.x, a.y);
+    }
+
+    function distance(a, b) {
+      return length(sub(a, b));
+    }
+
+    function normalized(a) {
+      const mag = length(a);
+      return mag === 0 ? vec(0, 0) : vec(a.x / mag, a.y / mag);
+    }
+
+    function limit(a, max) {
+      const mag = length(a);
+      return mag > max ? mul(normalized(a), max) : a;
+    }
+
+    function createScenario() {
+      const asset = { id: "A", p: vec(500, 350), r: 18, alive: true };
+      const friendlyCount = Number(ui.friendlies?.value || 8);
+      const hostileCount = Number(ui.hostiles?.value || 12);
+      const friendlies = [];
+      const hostiles = [];
+
+      for (let i = 0; i < friendlyCount; i += 1) {
+        friendlies.push({
+          id: `F${i + 1}`,
+          p: vec(500 + (i - friendlyCount / 2) * 18, 440 + Math.sin(i) * 20),
+          v: vec(0, 0),
+          speed: 42,
+          sensor: 360,
+          range: 28,
+          alive: true,
+          target: null
+        });
+      }
+
+      for (let i = 0; i < hostileCount; i += 1) {
+        const side = i % 4;
+        const p = side === 0 ? vec(80 + Math.random() * 840, 30 + Math.random() * 50)
+          : side === 1 ? vec(920 + Math.random() * 50, 80 + Math.random() * 540)
+          : side === 2 ? vec(80 + Math.random() * 840, 620 + Math.random() * 50)
+          : vec(30 + Math.random() * 50, 80 + Math.random() * 540);
+        const speed = 24 + Math.random() * 14;
+        hostiles.push({
+          id: `H${i + 1}`,
+          p,
+          v: mul(normalized(sub(asset.p, p)), speed),
+          speed,
+          range: 22,
+          ground: Math.random() < 0.65,
+          alive: true
+        });
+      }
+
+      return { asset, friendlies, hostiles, t: 0, neutralized: 0, attendance: 1 };
+    }
+
+    function scoreTarget(friendly, hostile) {
+      if (!friendly.alive || !hostile.alive || !state.asset.alive) return -Infinity;
+      const assetDistance = distance(hostile.p, state.asset.p);
+      const friendlyDistance = distance(friendly.p, hostile.p);
+      const secondsToAsset = assetDistance / Math.max(hostile.speed, 1);
+      const roleWeight = hostile.ground ? 2.2 : 1;
+      let score = (roleWeight * 180 / Math.max(secondsToAsset, 0.5)) + (80 / Math.max(assetDistance, 1));
+      score -= 0.45 * (friendlyDistance / friendly.speed);
+      if (hostile.ground && assetDistance <= hostile.speed * 10) score += 35;
+
+      const better = state.friendlies.filter(other =>
+        other !== friendly && other.alive && distance(other.p, hostile.p) + 20 < friendlyDistance
+      ).length;
+      return score - better * 8;
+    }
+
+    function step(dt) {
+      for (const friendly of state.friendlies) {
+        if (!friendly.alive) continue;
+        const visible = state.hostiles.filter(h => h.alive && distance(friendly.p, h.p) <= friendly.sensor);
+        let target = null;
+        let best = -Infinity;
+        for (const hostile of visible) {
+          const score = scoreTarget(friendly, hostile);
+          if (score > best) {
+            best = score;
+            target = hostile;
+          }
+        }
+        friendly.target = target;
+
+        let desired = target
+          ? mul(normalized(sub(add(target.p, mul(target.v, Math.min(8, distance(friendly.p, target.p) / (friendly.speed + target.speed)))), friendly.p)), friendly.speed)
+          : mul(normalized(sub(state.asset.p, friendly.p)), friendly.speed * 0.45);
+
+        let separation = vec(0, 0);
+        for (const other of state.friendlies) {
+          const d = distance(friendly.p, other.p);
+          if (other !== friendly && other.alive && d > 0 && d < 35) {
+            separation = add(separation, mul(normalized(sub(friendly.p, other.p)), (35 - d) / 35));
+          }
+        }
+        friendly.v = limit(add(desired, mul(separation, friendly.speed * 0.35)), friendly.speed);
+      }
+
+      for (const hostile of state.hostiles) {
+        if (!hostile.alive) continue;
+        const desired = mul(normalized(sub(state.asset.p, hostile.p)), hostile.speed);
+        hostile.v = add(mul(desired, 0.78), mul(normalized(hostile.v), hostile.speed * 0.22));
+      }
+
+      for (const friendly of state.friendlies) {
+        if (friendly.alive) friendly.p = add(friendly.p, mul(friendly.v, dt));
+      }
+
+      for (const hostile of state.hostiles) {
+        if (hostile.alive) hostile.p = add(hostile.p, mul(hostile.v, dt));
+      }
+
+      for (const hostile of state.hostiles) {
+        if (!hostile.alive) continue;
+        if (hostile.ground && distance(hostile.p, state.asset.p) <= state.asset.r) {
+          state.asset.alive = false;
+        }
+        for (const friendly of state.friendlies) {
+          if (friendly.alive && distance(friendly.p, hostile.p) <= Math.max(friendly.range, 12)) {
+            hostile.alive = false;
+            state.neutralized += 1;
+            break;
+          }
+        }
+      }
+
+      const activeThreats = state.hostiles.filter(h => h.alive && h.ground && distance(h.p, state.asset.p) <= h.speed * 10);
+      const attended = activeThreats.filter(h => state.friendlies.some(f =>
+        f.alive && (distance(f.p, h.p) <= f.range || distance(f.p, h.p) / f.speed <= 10)
+      ));
+      state.attendance = activeThreats.length ? attended.length / activeThreats.length : 1;
+      state.t += dt;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawAsset();
+      drawThreatRings();
+      drawAssignments();
+      drawDrones();
+      updateStats();
+    }
+
+    function drawAsset() {
+      ctx.save();
+      ctx.translate(state.asset.p.x, state.asset.p.y);
+      ctx.fillStyle = state.asset.alive ? colors.asset : "#6b737c";
+      ctx.strokeStyle = "rgba(110, 231, 168, 0.35)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, state.asset.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, 0, 120, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawThreatRings() {
+      for (const hostile of state.hostiles) {
+        if (!hostile.alive || !hostile.ground) continue;
+        ctx.strokeStyle = "rgba(255, 92, 122, 0.13)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(hostile.p.x, hostile.p.y, hostile.speed * 10, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    function drawAssignments() {
+      ctx.lineWidth = 1;
+      for (const friendly of state.friendlies) {
+        if (!friendly.alive || !friendly.target || !friendly.target.alive) continue;
+        ctx.strokeStyle = "rgba(76, 201, 240, 0.22)";
+        ctx.beginPath();
+        ctx.moveTo(friendly.p.x, friendly.p.y);
+        ctx.lineTo(friendly.target.p.x, friendly.target.p.y);
+        ctx.stroke();
+      }
+    }
+
+    function drawDrones() {
+      for (const hostile of state.hostiles) {
+        if (!hostile.alive) continue;
+        ctx.fillStyle = hostile.ground ? colors.hostileGround : colors.hostileAir;
+        ctx.beginPath();
+        ctx.arc(hostile.p.x, hostile.p.y, hostile.ground ? 8 : 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      for (const friendly of state.friendlies) {
+        if (!friendly.alive) continue;
+        ctx.fillStyle = colors.friendly;
+        ctx.beginPath();
+        ctx.moveTo(friendly.p.x + 10, friendly.p.y);
+        ctx.lineTo(friendly.p.x - 8, friendly.p.y - 7);
+        ctx.lineTo(friendly.p.x - 8, friendly.p.y + 7);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function updateStats() {
+      ui.time.textContent = `${state.t.toFixed(1)}s`;
+      ui.asset.textContent = state.asset.alive ? "Alive" : "Lost";
+      ui.neutralized.textContent = String(state.neutralized);
+      ui.attendance.textContent = `${Math.round(state.attendance * 100)}%`;
+      ui.friendlyValue.textContent = ui.friendlies.value;
+      ui.hostileValue.textContent = ui.hostiles.value;
+      ui.speedValue.textContent = `${Number(ui.speed.value).toFixed(1)}x`;
+    }
+
+    function frame() {
+      if (!paused && state.asset.alive && state.hostiles.some(h => h.alive)) {
+        step(0.5 * Number(ui.speed.value));
+      }
+      draw();
+      requestAnimationFrame(frame);
+    }
+
+    ui.toggle.addEventListener("click", () => {
+      paused = !paused;
+      ui.toggle.textContent = paused ? "Run" : "Pause";
+    });
+
+    ui.reset.addEventListener("click", () => {
+      state = createScenario();
+      paused = false;
+      ui.toggle.textContent = "Pause";
+    });
+
+    ui.friendlies.addEventListener("input", () => {
+      state = createScenario();
+    });
+
+    ui.hostiles.addEventListener("input", () => {
+      state = createScenario();
+    });
+
+    frame();
+  </script>
+</body>
+</html>

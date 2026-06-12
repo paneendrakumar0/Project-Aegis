@@ -45,6 +45,13 @@ python3 -m aegis.cli --runs 25 --seed 42
 
 Open `web/index.html` in a browser for the lightweight visual demo.
 
+To export per-run evaluation data:
+
+```bash
+mkdir -p reports
+python3 -m aegis.cli --runs 100 --seed 42 --csv reports/baseline-100.csv
+```
+
 ## Engineering Standard
 
 The project is developed in coherent commits, with tests run before push where
