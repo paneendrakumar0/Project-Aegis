@@ -36,11 +36,11 @@ web/                Browser-based visual simulation demo
 ## Quick Start
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 pytest
-python -m aegis.cli --runs 25 --seed 42
+python3 -m aegis.cli --runs 25 --seed 42
 ```
 
 Open `web/index.html` in a browser for the lightweight visual demo.
