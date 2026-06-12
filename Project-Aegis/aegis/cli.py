@@ -5,6 +5,9 @@ import csv
 import sys
 
 from aegis.simulator import run_batch
+from aegis.scenario import default_scenario
+from aegis.simulator import run_recorded_simulation
+from aegis.telemetry import write_jsonl
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -14,6 +17,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--friendlies", type=int, default=8, help="Friendly drone count.")
     parser.add_argument("--hostiles", type=int, default=10, help="Hostile drone count.")
     parser.add_argument("--csv", type=str, default="", help="Optional path for per-run CSV output.")
+    parser.add_argument("--trace-jsonl", type=str, default="", help="Optional JSONL telemetry trace for the first run.")
     return parser
 
 
@@ -41,9 +45,16 @@ def main(argv: list[str] | None = None) -> int:
                 row["success"] = result.success
                 writer.writerow(row)
 
+    if args.trace_jsonl:
+        recorded = run_recorded_simulation(
+            default_scenario(seed=args.seed, friendly_count=args.friendlies, hostile_count=args.hostiles),
+            seed=args.seed,
+            record=True,
+        )
+        write_jsonl(recorded.frames, args.trace_jsonl)
+
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-

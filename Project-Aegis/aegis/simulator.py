@@ -6,6 +6,7 @@ from random import Random
 from aegis.models import Asset, Drone, Scenario
 from aegis.policy import choose_target, steering_velocity, threatening_range
 from aegis.scenario import default_scenario
+from aegis.telemetry import TelemetryFrame, capture_frame
 
 
 @dataclass(frozen=True)
@@ -24,6 +25,12 @@ class SimulationResult:
     @property
     def success(self) -> bool:
         return self.assets_survived == self.assets_total and self.hostiles_neutralized == self.hostiles_total
+
+
+@dataclass(frozen=True)
+class RecordedSimulation:
+    result: SimulationResult
+    frames: list[TelemetryFrame]
 
 
 def _resolve_asset_impacts(assets: tuple[Asset, ...], hostiles: tuple[Drone, ...]) -> tuple[Asset, ...]:
@@ -77,15 +84,33 @@ def _attendance_rate(friendlies: tuple[Drone, ...], hostiles: tuple[Drone, ...],
 
 
 def run_simulation(scenario: Scenario, seed: int = 0) -> SimulationResult:
+    return run_recorded_simulation(scenario, seed=seed, record=False).result
+
+
+def run_recorded_simulation(scenario: Scenario, seed: int = 0, record: bool = True) -> RecordedSimulation:
     rng = Random(seed)
     assets = scenario.assets
     friendlies = scenario.friendlies
     hostiles = scenario.hostiles
     neutralized_total = 0
     attendance_samples = []
+    frames: list[TelemetryFrame] = []
     steps = int(scenario.max_time / scenario.dt)
 
     for step in range(steps):
+        if record:
+            frames.append(
+                capture_frame(
+                    scenario_seed=seed,
+                    frame_index=step,
+                    time_s=step * scenario.dt,
+                    assets=assets,
+                    friendlies=friendlies,
+                    hostiles=hostiles,
+                    attendance_rate=attendance_samples[-1] if attendance_samples else 1.0,
+                )
+            )
+
         decisions = {
             friendly.id: choose_target(friendly, hostiles, assets, friendlies)
             for friendly in friendlies
@@ -125,7 +150,7 @@ def run_simulation(scenario: Scenario, seed: int = 0) -> SimulationResult:
     friendlies_remaining = sum(1 for friendly in friendlies if friendly.alive)
     attendance_rate = sum(attendance_samples) / max(len(attendance_samples), 1)
 
-    return SimulationResult(
+    result = SimulationResult(
         seed=seed,
         steps=steps,
         elapsed_time=steps * scenario.dt,
@@ -137,6 +162,19 @@ def run_simulation(scenario: Scenario, seed: int = 0) -> SimulationResult:
         friendlies_total=len(friendlies),
         attendance_rate=attendance_rate,
     )
+    if record:
+        frames.append(
+            capture_frame(
+                scenario_seed=seed,
+                frame_index=steps,
+                time_s=steps * scenario.dt,
+                assets=assets,
+                friendlies=friendlies,
+                hostiles=hostiles,
+                attendance_rate=attendance_rate,
+            )
+        )
+    return RecordedSimulation(result=result, frames=frames)
 
 
 def run_batch(runs: int, seed: int = 0, friendly_count: int = 8, hostile_count: int = 10) -> list[SimulationResult]:
@@ -147,4 +185,3 @@ def run_batch(runs: int, seed: int = 0, friendly_count: int = 8, hostile_count: 
         )
         for index in range(runs)
     ]
-
