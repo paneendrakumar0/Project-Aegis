@@ -1,4 +1,4 @@
-.PHONY: test smoke report trace scenario-trace media
+.PHONY: test smoke report trace scenario-trace media gazebo-scene
 
 test:
 	python3 -m pytest
@@ -20,3 +20,6 @@ scenario-trace:
 
 media: scenario-trace
 	python3 tools/render_trace_media.py --trace reports/baseline-scenario-trace.jsonl --out-dir assets/media
+
+gazebo-scene: scenario-trace
+	python3 tools/export_gazebo_scene.py --trace reports/baseline-scenario-trace.jsonl

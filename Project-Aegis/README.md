@@ -1,7 +1,5 @@
 # Project Aegis
 
-![Project Aegis industrial simulation pipeline](assets/media/simulation-pipeline.png)
-
 Project Aegis is a simulation-first research prototype for decentralized
 counter-swarm protection of ground assets. It is designed around the BEL
 SIH25164 problem statement: friendly autonomous drones protect designated
@@ -12,18 +10,13 @@ This repository is intentionally scoped to modelling, simulation, evaluation,
 and operator visualization. It does not provide hardware integration,
 real-world targeting instructions, or deployable weapon-control logic.
 
-## Demo Preview
+## Review Positioning
 
-![Project Aegis mission replay](assets/media/mission-replay.gif)
+Project Aegis should be presented as a simulation and evaluation stack, not as
+a web frontend. The authoritative artifacts are scenario manifests, telemetry,
+metrics, ROS/Gazebo integration, and future Isaac Sim or Unreal Engine renders.
 
-![Project Aegis tactical snapshot](assets/media/mission-snapshot.png)
-
-Mission recording: [assets/media/mission-recording.mp4](assets/media/mission-recording.mp4)
-
-The visuals above are generated from the reproducible scenario manifest at
-`scenarios/baseline_asset_defense.json`, not hand-drawn. The same telemetry
-stream is the basis for ROS 2 bag playback and future Isaac Sim or Unreal
-Engine rendering.
+![Project Aegis industrial simulation pipeline](assets/media/simulation-pipeline.png)
 
 ## Current Objective
 
@@ -42,7 +35,7 @@ solution architecture to technical evaluators:
 ## Repository Layout
 
 ```text
-assets/media/       Generated README images and replay GIFs
+assets/media/       Generated presentation media and demo manifest
 aegis/              Core simulation and decision policy package
 docs/               Concept notes, architecture, and roadmap
 integrations/       ROS 2 bridge skeleton and future renderer integrations
@@ -74,6 +67,7 @@ make test
 make smoke
 make report
 make scenario-trace
+make gazebo-scene
 make media
 ```
 
@@ -100,6 +94,11 @@ Generated media:
 - `assets/media/mission-recording.mp4`
 - `assets/media/demo-manifest.json`
 
+Gazebo artifacts:
+
+- `integrations/gazebo/worlds/aegis_baseline.world`
+- `integrations/gazebo/trajectories/aegis_baseline_trajectory.csv`
+
 ## Recording Pipeline
 
 The intended industrial recording path is:
@@ -112,6 +111,7 @@ Current executable step:
 
 ```bash
 make scenario-trace
+make gazebo-scene
 ```
 
 ROS 2 bridge skeleton:
@@ -128,6 +128,11 @@ ros2 bag record /clock /tf /aegis/entities /aegis/metrics -o reports/bags/trace-
 ```
 
 High-fidelity rendering is documented in `docs/RENDERING_PIPELINE.md`.
+Workstation setup and install priorities are documented in
+`docs/WORKSTATION_SETUP.md`.
+
+Lightweight GIF/MP4 media exists under `assets/media/` for repository previews,
+but it is not the intended product demonstration.
 
 ## Engineering Standard
 
