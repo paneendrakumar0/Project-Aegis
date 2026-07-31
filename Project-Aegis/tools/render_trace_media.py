@@ -211,7 +211,10 @@ def main() -> int:
     )
     draw_frame(frames[len(frames) // 2], "Project Aegis Tactical Snapshot").save(out_dir / "mission-snapshot.png")
     draw_architecture(out_dir / "simulation-pipeline.png")
-    write_mp4(frames, out_dir / "mission-recording.mp4")
+    try:
+        write_mp4(frames, out_dir / "mission-recording.mp4")
+    except FileNotFoundError:
+        print("ffmpeg not found, skipping mission-recording.mp4 generation.")
     write_demo_manifest(out_dir / "demo-manifest.json", Path(args.trace), out_dir, len(frames))
     print(f"wrote media to {out_dir}")
     return 0
